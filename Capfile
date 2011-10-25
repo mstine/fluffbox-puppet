@@ -49,6 +49,17 @@ task :configure_master, roles => :server do
   run "service puppetmaster restart"
 end
 
+task :install_sudo_module, roles => :server do
+  template = ERB.new(File.read('site.pp.erb'), nil, '<>')
+  result = template.result(binding)
+  put(result, "/etc/puppet/manifests/site.pp")
+  
+  upload 'nodes.pp', '/etc/puppet/manifests/nodes.pp'
+  
+  run "rm -rf /etc/puppet/modules"
+  upload 'modules', '/etc/puppet/modules'
+end
+
 task :connect_agent, roles => :server do
   run "puppet agent --server=#{master_address} --no-daemonize --verbose"
 end
