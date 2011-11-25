@@ -1,3 +1,3 @@
 node 'fluffbox-web' {
-	include java
+	include java, tomcat
 }
