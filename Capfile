@@ -1,34 +1,58 @@
 task :master do
-  set :ip_address, "50.57.161.196"
-  set :password, "pro-puppet-masterLIe13M3kt"
+  set :ip_address, "50.57.188.170"
+  set :password, "puppet-masterm4SdAgR27"
   set :puppet_pkgs, "puppet puppetmaster facter"
   
   role :server, "#{ip_address}"
 end
 
-task :agent do
-  set :master_address, "50.57.161.196"
-  set :ip_address, "50.57.161.200"
-  set :password, "pro-puppet-node1r70kKpQK4"
+task :web_server do
+  set :master_address, "50.57.188.170"
+  set :ip_address, "50.57.232.216"
+  set :password, "fluffbox-web2awQp6S3O"
   set :puppet_pkgs, "puppet facter"
   
   role :server, "#{ip_address}"
+  
+  setup_agent
+end
+
+task :db_server do
+  set :master_address, "50.57.188.170"
+  set :ip_address, "50.57.232.229"
+  set :password, "fluffbox-db7ArpP46kH"
+  set :puppet_pkgs, "puppet facter"
+  
+  role :server, "#{ip_address}"
+  
+  setup_agent
 end
 
 set :user, "root"
 
 task :setup_master do
   master
+  update_apt
   install_ruby
   install_puppet
   configure_master
 end
 
 task :setup_agent do
-  agent
+  update_apt
   install_ruby
   install_puppet
   connect_agent
+end
+
+task :serverless_agent do
+  agent
+  install_ruby
+  install_puppet
+end
+
+task :update_apt, roles => :server do
+  run "apt-get update"
 end
 
 task :install_ruby, roles => :server do
@@ -49,15 +73,17 @@ task :configure_master, roles => :server do
   run "service puppetmaster restart"
 end
 
-task :install_sudo_module, roles => :server do
+task :update_config, roles => :server do
   template = ERB.new(File.read('site.pp.erb'), nil, '<>')
   result = template.result(binding)
   put(result, "/etc/puppet/manifests/site.pp")
   
   upload 'nodes.pp', '/etc/puppet/manifests/nodes.pp'
-  
-  run "rm -rf /etc/puppet/modules"
-  upload 'modules', '/etc/puppet/modules'
+end
+
+task :install_module, roles => :server do  
+  run "rm -rf /etc/puppet/modules/#{module_name}"
+  upload "modules/#{module_name}", "/etc/puppet/modules/#{module_name}"
 end
 
 task :connect_agent, roles => :server do
@@ -69,5 +95,5 @@ task :list_certs, roles => :server do
 end
 
 task :sign_cert, roles => :server do
-  run "puppet cert --sign pro-puppet-node1"
+  run "puppet cert --sign #{node}"
 end

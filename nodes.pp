@@ -1,3 +1,3 @@
-node 'pro-puppet-node1' {
-	include sudo
+node 'fluffbox-web' {
+	include java
 }
