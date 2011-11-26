@@ -1,31 +1,27 @@
 task :master do
-  set :ip_address, "50.57.188.170"
-  set :password, "puppet-masterm4SdAgR27"
+  set :ip_address, "50.57.186.228"
+  set :password, "puppet-masterXr3j4dWR5"
   set :puppet_pkgs, "puppet puppetmaster facter"
   
   role :server, "#{ip_address}"
 end
 
 task :web_server do
-  set :master_address, "50.57.188.170"
-  set :ip_address, "50.57.232.216"
-  set :password, "fluffbox-web2awQp6S3O"
+  set :master_address, "50.57.186.228"
+  set :ip_address, "50.57.190.70"
+  set :password, "fluffbox-webS10lnXwX2"
   set :puppet_pkgs, "puppet facter"
   
   role :server, "#{ip_address}"
-  
-  setup_agent
 end
 
 task :db_server do
-  set :master_address, "50.57.188.170"
-  set :ip_address, "50.57.232.229"
-  set :password, "fluffbox-db7ArpP46kH"
+  set :master_address, "50.57.186.228"
+  set :ip_address, "50.57.187.18"
+  set :password, "fluffbox-db5Csi2L2aX"
   set :puppet_pkgs, "puppet facter"
   
   role :server, "#{ip_address}"
-  
-  setup_agent
 end
 
 set :user, "root"
@@ -81,6 +77,11 @@ task :update_config, roles => :server do
   upload 'nodes.pp', '/etc/puppet/manifests/nodes.pp'
 end
 
+task :upload_all_modules, roles => :server do
+  run "rm -rf /etc/puppet/modules"
+  upload "modules", "/etc/puppet/modules"
+end
+
 task :install_module, roles => :server do  
   run "rm -rf /etc/puppet/modules/#{module_name}"
   upload "modules/#{module_name}", "/etc/puppet/modules/#{module_name}"
@@ -96,4 +97,12 @@ end
 
 task :sign_cert, roles => :server do
   run "puppet cert --sign #{node}"
+end
+
+task :clean_cert, roles => :server do
+  run "puppet cert --clean #{node}"
+end
+
+task :puppet_run, roles => :server do
+  run "puppet agent --server=#{master_address} --no-daemonize --verbose --onetime"
 end
