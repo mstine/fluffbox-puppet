@@ -37,7 +37,7 @@ class mysql::server {
 	db { "fluffbox":
 		user => "fluffbox",
 		password => "fluffbox",
-		require => Service["mysql"],
+		require => Exec["set-mysql-password"],
 	}
 	
 }
